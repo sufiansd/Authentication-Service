@@ -1,0 +1,204 @@
+swagger: "2.0"
+info:
+  description: "Authentication Microservice for Employee Managemetn System"
+  version: "1.0.0"
+  title: "Authentication Service"
+
+basePath: "/"
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+tags:
+  - name: "Signup"
+    description: "Employee Signup"
+schemes:
+  - "http"
+
+
+
+paths:
+  /signup:
+    post:
+      summary: "An employee signs up through this API"
+      description: "An employee's data is saved in the database using this API"
+      operationId: "EmployeeSignup"
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/employee"
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: '#/definitions/employee'
+        409:
+          schema:
+            type: string
+          description: Already Exists
+        500:
+          schema:
+            type: string
+          description: Server error
+
+  /login:
+    post:
+      summary: "An employee logs in through this APII"
+      description: "Returns token for an authorized employee"
+      operationId: Login
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: "login"
+          in: "body"
+          required: true
+          description: "Login Payload"
+          schema:
+            $ref: "#/definitions/LoginInfo"
+      responses:
+        200:
+          description: Successful login
+          schema:
+            $ref: "#/definitions/LoginSuccess"
+        401:
+          schema:
+            type: string
+          description: Incorrect Password
+        404:
+          schema:
+            type: string
+          description: Email not found
+        500:
+          schema:
+            type: string
+          description: Internal Server Error
+
+  /showProfile/{email}:
+    get:
+      summary: "Show Employee recoard"
+      operationId: "showProfile"
+      security:
+        - Bearer: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "email"
+          in: "path"
+          description: "Enter user_id to Show the Recoard of Team Member"
+          required: true
+          type: "string"
+
+      responses:
+        200:
+          description: Found
+          schema:
+            $ref: "#/definitions/employee"
+        400:
+          description: Bad Request
+          schema:
+            type: string
+        401:
+          description: Unotherized
+          schema:
+            type: string
+        404:
+          description: Not Found
+          schema:
+            type: string
+        500:
+          description: Internal Server Error
+          schema:
+            type: string
+
+
+
+  /validateToken:
+    get:
+      summary: "Responds whether the recieved token is valid or not"
+      description: "Returns a response of success or failure based on the recieved token"
+      operationId: ValidateToken
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      responses:
+        200:
+          description: Valid Token
+          schema:
+            type: string
+
+        401:
+          description: Invalid Token
+          schema:
+            type: string
+
+        500:
+          description: Internal Server Error
+          schema:
+            type: string
+
+definitions:
+  employee:
+    type: "object"
+    required:
+      - "full_name"
+      - "father_name"
+      - "age"
+      - "email"
+      - "password"
+      - "NIC"
+      - "gender"
+    properties:
+      full_name:
+        type: "string"
+        example: "Ahmed Khan"
+
+      father_name:
+        type: "string"
+        example: "Ali Ahmed"
+
+      age:
+        type: integer
+        example: 23
+
+      email:
+        type: string
+        example: 123@wanclouds.net
+        pattern: '^[a-zA-Z0-9_\-\.]+[@][wanclouds]{0,9}[\.][net]{3}$'
+
+      password:
+        type: "string"
+
+      NIC:
+        type: "string"
+        example: "15101-8745216-9"
+
+      gender:
+        type: "string"
+        example: "Male"
+
+  LoginInfo:
+    type: object
+    required: [email, password]
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+
+  LoginSuccess:
+    type: object
+    properties:
+      success:
+        type: boolean
+      token:
+        type: string
